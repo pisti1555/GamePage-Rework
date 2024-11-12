@@ -1,17 +1,20 @@
 package projektek.GameSite.services.implementation;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import projektek.GameSite.exceptions.JwtTokenException;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,14 +25,8 @@ public class JwtService {
     private final String secretKey;
 
     public JwtService() {
-        KeyGenerator keyGen;
-        try {
-            keyGen = KeyGenerator.getInstance("HmacSHA512");
-            SecretKey sk = keyGen.generateKey();
-            secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+        Dotenv env = Dotenv.load();
+        this.secretKey = env.get("JWT_SECRET_KEY");
     }
 
     public String generateToken(String username) {
@@ -60,11 +57,22 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(getKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            Map<String, String> errors = new HashMap<>();
+            errors.put("jwt", "JWT expired");
+            throw new JwtTokenException(errors);
+        } catch (JwtException e) {
+            Map<String, String> errors = new HashMap<>();
+            errors.put("jwt", "JWT error");
+            throw new JwtTokenException(errors);
+        }
+
     }
 
     public boolean validateToken(String token, UserDetails userDetails) {

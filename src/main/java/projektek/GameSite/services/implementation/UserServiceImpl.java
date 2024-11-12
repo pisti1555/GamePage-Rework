@@ -13,7 +13,9 @@ import projektek.GameSite.models.data.user.User;
 import projektek.GameSite.models.repositories.UserRepository;
 import projektek.GameSite.services.interfaces.UserService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -37,22 +39,34 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUser(Long id) {
+        Map<String, String> errors = new HashMap<>();
         Optional<User> user = repository.findById(id);
-        if (user.isEmpty()) throw new NotFoundException("Could not find user");
+        if (user.isEmpty()) {
+            errors.put("user", "Could not find user");
+            throw new NotFoundException(errors);
+        }
         return user.get();
     }
 
     @Override
     public User getUserByUsername(String username) {
+        Map<String, String> errors = new HashMap<>();
         User user = repository.findByUsername(username);
-        if (user == null) throw new NotFoundException("Could not find user by username");
+        if (user == null) {
+            errors.put("user", "Could not find user by username");
+            throw new NotFoundException(errors);
+        }
         return user;
     }
 
     @Override
     public User getUserByEmail(String email) {
+        Map<String, String> errors = new HashMap<>();
         User user = repository.findByEmail(email);
-        if (user == null) throw new NotFoundException("Could not find user by e-mail");
+        if (user == null) {
+            errors.put("user", "Could not find user by e-mail");
+            throw new NotFoundException(errors);
+        }
         return user;
     }
 

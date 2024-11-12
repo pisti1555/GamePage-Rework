@@ -14,7 +14,9 @@ import projektek.GameSite.models.repositories.FriendRequestRepository;
 import projektek.GameSite.services.interfaces.FriendRequestService;
 import projektek.GameSite.services.interfaces.UserService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class FriendRequestServiceImpl implements FriendRequestService {
@@ -32,14 +34,20 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     @Override
     public boolean sendRequest(String username) {
         User sender = userService.getUserByAuth();
+        Map<String, String> errors = new HashMap<>();
 
         if (sender.getUsername().equals(username)) {
-            throw new ForbiddenException("Cannot add yourself as a friend");
+            errors.put("username", "Cannot add yourself as a friend");
         }
 
         User receiver = userService.getUserByUsername(username);
-        if (repository.isFriendRequestSentToUser(sender, receiver)) throw new BadRequestException("Friend request already sent");
+        if (repository.isFriendRequestSentToUser(sender, receiver)) {
+            errors.put("username", "Friend request already sent");
+        }
 
+        if (!errors.isEmpty()) {
+            throw new BadRequestException("Unable to add friend", errors);
+        }
         FriendRequest existingRequest = repository.findBySenderAndReceiver(receiver, sender);
         if (existingRequest != null) {
             return acceptFriendRequest(existingRequest);
@@ -68,8 +76,12 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     public void cancelRequest(String username) {
         User user = userService.getUserByAuth();
         User receiver = userService.getUserByUsername(username);
+        Map<String, String> errors = new HashMap<>();
         FriendRequest request = repository.findBySenderAndReceiver(user, receiver);
-        if (request == null) throw new NotFoundException("Could not find friend request");
+        if (request == null) {
+            errors.put("user", "Could not find friend request");
+            throw new NotFoundException(errors);
+        }
         destroyRequest(request);
     }
 
@@ -77,8 +89,12 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     public void rejectFriendRequest(String username) {
         User user = userService.getUserByAuth();
         User sender = userService.getUserByUsername(username);
+        Map<String, String> errors = new HashMap<>();
         FriendRequest request = repository.findBySenderAndReceiver(sender, user);
-        if (request == null) throw new NotFoundException("Could not find friend request");
+        if (request == null) {
+            errors.put("user", "Could not find friend request");
+            throw new NotFoundException(errors);
+        }
         destroyRequest(request);
     }
 
@@ -87,13 +103,14 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     }
 
     private boolean acceptFriendRequest(FriendRequest request) {
-        if (friendRepository.areFriends(request.getSender(), request.getReceiver())) {
-            throw new BadRequestException("Cannot add user as friend, because it already is");
-        }
+        Map<String, String> errors = new HashMap<>();
 
-
-        if (friendRepository.areFriends(request.getReceiver(), request.getSender())) {
-            throw new BadRequestException("Cannot add user as friend, because it already is");
+        if (
+                friendRepository.areFriends(request.getSender(), request.getReceiver())
+                || friendRepository.areFriends(request.getReceiver(), request.getSender())
+        ) {
+            errors.put("user", "This user is already your friend");
+            throw new BadRequestException(errors);
         }
 
         friendRepository.save(new Friend(request.getSender(), request.getReceiver()));

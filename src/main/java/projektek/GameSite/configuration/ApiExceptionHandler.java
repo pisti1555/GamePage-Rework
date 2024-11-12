@@ -12,12 +12,19 @@ public class ApiExceptionHandler {
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<Object> handleBadRequestException(BadRequestException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                new ApiResponse("error", e.getMessage(), null)
+                new ApiResponse("error", e.getMessage(), null, e.getErrors())
         );
     }
 
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<Object> handleUnauthorizedException(UnauthorizedException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                new ApiResponse("error", e.getMessage(), null, e.getErrors())
+        );
+    }
+
+    @ExceptionHandler(JwtTokenException.class)
+    public ResponseEntity<Object> handleUnauthorizedException(JwtTokenException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                 new ApiResponse("error", e.getMessage(), null)
         );

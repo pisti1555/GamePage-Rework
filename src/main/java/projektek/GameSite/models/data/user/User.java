@@ -35,8 +35,7 @@ public class User implements UserDetails {
 
     public User() {}
 
-    public User(@Nullable String description, String lastName, String firstName, String password, String email, String username) {
-        this.description = description;
+    public User(String lastName, String firstName, String password, String email, String username) {
         this.lastName = lastName;
         this.firstName = firstName;
         this.password = password;

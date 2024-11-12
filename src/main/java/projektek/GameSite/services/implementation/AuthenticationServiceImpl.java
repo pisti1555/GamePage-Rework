@@ -19,6 +19,9 @@ import projektek.GameSite.models.repositories.RoleRepository;
 import projektek.GameSite.models.repositories.UserRepository;
 import projektek.GameSite.services.interfaces.AuthenticationService;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository userRepository;
@@ -38,17 +41,39 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public AuthenticatedUserDto register (RegistrationDto dto) {
-        String password = encoder.encode(dto.getPassword());
+        Map<String, String> errors = new HashMap<>();
 
+        if (dto.getFirstName().length() < 2) {
+            errors.put("firstName", "First name is too short");
+        }
+        if (dto.getLastName().length() < 2) {
+            errors.put("lastName", "Last name is too short");
+        }
+        String emailRegex = "^[\\w.-]+@([\\w-]+\\.)+[\\w-]{2,4}$";
+        if (!dto.getEmail().matches(emailRegex)) {
+            errors.put("email", "Invalid email format");
+        }
         if (userRepository.findByEmail(dto.getEmail()) != null) {
-            throw new BadRequestException("This e-mail is already in use");
+            errors.put("email", "This e-mail is already in use");
         }
         if (userRepository.findByUsername(dto.getUsername()) != null) {
-            throw new BadRequestException("This username is already in use");
+            errors.put("username", "This username is already in use");
+        }
+        String passwordRegex = "^(?=.*\\d).{6,}$";
+        if (!dto.getPassword().matches(passwordRegex)) {
+            errors.put("password", "Password must be at least 6 characters long and contain at least one digit");
+        }
+        if (!dto.getPassword().equals(dto.getPasswordConfirm())) {
+            errors.put("passwordConfirm", "Passwords don't match");
         }
 
+        if (!errors.isEmpty()) {
+            throw new BadRequestException("Registration failed", errors);
+        }
+
+        String password = encoder.encode(dto.getPassword());
+
         User user = new User(
-                dto.getDescription(),
                 dto.getLastName(),
                 dto.getFirstName(),
                 password,
@@ -71,19 +96,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                             dto.getPassword()
                     )
             );
-
             String token = jwtService.generateToken(dto.getUsername());
             return new AuthenticatedUserDto(authentication.getName(), token);
         } catch (BadCredentialsException e) {
             User user = userRepository.findByUsername(dto.getUsername());
+            Map<String, String> errors = new HashMap<>();
             if (user == null) {
-                throw new UnauthorizedException("User does not exist");
-            }
-            if (!encoder.matches(dto.getPassword(), user.getPassword())) {
-                throw new UnauthorizedException("Invalid password");
+                errors.put("username", "User does not exist");
+            } else if (!encoder.matches(dto.getPassword(), user.getPassword())) {
+                errors.put("password", "Invalid password");
             }
 
-            throw new UnauthorizedException("Cannot authenticate");
+            throw new UnauthorizedException("Authentication failed", errors);
         } catch (Exception e) {
             throw new UnexpectedException();
         }

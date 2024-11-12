@@ -20,7 +20,7 @@ public class AuthenticationController {
         this.service = service;
     }
 
-    @PostMapping("/register")
+    @PostMapping("/api/register")
     public ResponseEntity<Object> register (@RequestBody RegistrationDto dto) {
         AuthenticatedUserDto user = service.register(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -28,7 +28,7 @@ public class AuthenticationController {
         );
     }
 
-    @PostMapping("/login")
+    @PostMapping("/api/login")
     public ResponseEntity<Object> login(@RequestBody LoginDto dto) {
         AuthenticatedUserDto user = service.login(dto);
         return ResponseEntity.status(HttpStatus.OK).body(
