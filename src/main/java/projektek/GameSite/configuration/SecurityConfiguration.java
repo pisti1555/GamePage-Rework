@@ -40,10 +40,10 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(request -> request
-                    .requestMatchers("login", "register").permitAll()
+                    .requestMatchers("/api/login", "/api/register").permitAll()
+                    .requestMatchers("/thumbnails/**", "/images/**").permitAll()
                     .anyRequest().authenticated()
                 )
-                .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )

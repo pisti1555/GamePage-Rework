@@ -38,6 +38,15 @@ public class FriendController {
         );
     }
 
+    @GetMapping("/{username}")
+    public ResponseEntity<Object> getFriendsOfUser(@PathVariable String username) {
+        List<User> friends = friendService.getFriendsOfUser(username);
+        List<UserDto> users = friends.stream().map(user -> mapper.map(user, UserDto.class)).toList();
+        return ResponseEntity.ok().body(
+                new ApiResponse("success", "Request was successful", users)
+        );
+    }
+
     @DeleteMapping("/{username}")
     public ResponseEntity<Object> removeFriend(@PathVariable String username) {
         friendService.removeFriend(username);

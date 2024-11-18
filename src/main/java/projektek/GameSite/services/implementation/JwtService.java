@@ -10,6 +10,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import projektek.GameSite.exceptions.JwtTokenException;
+import projektek.GameSite.exceptions.UnexpectedException;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -57,22 +58,11 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        try {
-            return Jwts.parserBuilder()
-                    .setSigningKey(getKey())
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-        } catch (ExpiredJwtException e) {
-            Map<String, String> errors = new HashMap<>();
-            errors.put("jwt", "JWT expired");
-            throw new JwtTokenException(errors);
-        } catch (JwtException e) {
-            Map<String, String> errors = new HashMap<>();
-            errors.put("jwt", "JWT error");
-            throw new JwtTokenException(errors);
-        }
-
+        return Jwts.parserBuilder()
+                .setSigningKey(getKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
     public boolean validateToken(String token, UserDetails userDetails) {

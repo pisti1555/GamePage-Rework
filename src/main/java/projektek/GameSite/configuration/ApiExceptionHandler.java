@@ -26,7 +26,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(JwtTokenException.class)
     public ResponseEntity<Object> handleUnauthorizedException(JwtTokenException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                new ApiResponse("error", e.getMessage(), null)
+                new ApiResponse("error", e.getMessage(), null, e.getErrors())
         );
     }
 

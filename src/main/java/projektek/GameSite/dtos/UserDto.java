@@ -1,5 +1,7 @@
 package projektek.GameSite.dtos;
 
+import java.util.List;
+
 public class UserDto {
     private Long id;
     private String username;
@@ -8,11 +10,8 @@ public class UserDto {
     private String lastName;
     private String avatar;
     private String description;
-    private FitwStatsDto fitwStats;
-    private TicTacToeStatsDto ticTacToeStats;
 
-    public UserDto() {
-    }
+    public UserDto() {}
 
     public UserDto(Long id, String username, String email, String firstName, String lastName, String avatar, String description) {
         this.id = id;
@@ -78,21 +77,5 @@ public class UserDto {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public FitwStatsDto getFitwStats() {
-        return fitwStats;
-    }
-
-    public void setFitwStats(FitwStatsDto fitwStats) {
-        this.fitwStats = fitwStats;
-    }
-
-    public TicTacToeStatsDto getTicTacToeStats() {
-        return ticTacToeStats;
-    }
-
-    public void setTicTacToeStats(TicTacToeStatsDto ticTacToeStats) {
-        this.ticTacToeStats = ticTacToeStats;
     }
 }

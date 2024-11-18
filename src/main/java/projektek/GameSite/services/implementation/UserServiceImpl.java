@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import projektek.GameSite.dtos.Mapper;
 import projektek.GameSite.dtos.UserDto;
 import projektek.GameSite.exceptions.NotFoundException;
+import projektek.GameSite.exceptions.UnauthorizedException;
 import projektek.GameSite.models.data.user.User;
 import projektek.GameSite.models.repositories.UserRepository;
 import projektek.GameSite.services.interfaces.UserService;
@@ -32,9 +33,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByAuth() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = repository.findByUsername(auth.getName());
-        return user;
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            return repository.findByUsername(auth.getName());
+        } catch (Exception e) {
+            Map<String, String> errors = new HashMap<>();
+            errors.put("Authorization", "You are unauthenticated");
+            throw new UnauthorizedException(errors);
+        }
     }
 
     @Override

@@ -3,7 +3,6 @@ package projektek.GameSite.services.implementation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import projektek.GameSite.exceptions.BadRequestException;
-import projektek.GameSite.exceptions.ForbiddenException;
 import projektek.GameSite.exceptions.NotFoundException;
 import projektek.GameSite.models.data.user.User;
 import projektek.GameSite.models.data.user.friends.Friend;
@@ -11,7 +10,6 @@ import projektek.GameSite.models.repositories.FriendRepository;
 import projektek.GameSite.services.interfaces.FriendService;
 import projektek.GameSite.services.interfaces.UserService;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +48,13 @@ public class FriendServiceImpl implements FriendService {
     @Override
     public List<User> getFriends() {
         User user = userService.getUserByAuth();
+        return repository.getFriends(user);
+    }
+
+    @Override
+    public List<User> getFriendsOfUser(String username) {
+        User user = userService.getUserByUsername(username);
+        if (user == null) throw new NotFoundException();
         return repository.getFriends(user);
     }
 
