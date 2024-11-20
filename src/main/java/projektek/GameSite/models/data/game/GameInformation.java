@@ -12,15 +12,17 @@ public class GameInformation {
     private String url;
     private String thumbnailUrl;
     private String imageUrl;
+    private int maxPlayers;
     private String description;
 
     public GameInformation() {}
 
-    public GameInformation(String name, String url, String thumbnailUrl, String imageUrl, String description) {
+    public GameInformation(String name, String url, String thumbnailUrl, String imageUrl, int maxPlayers, String description) {
         this.name = name;
         this.url = url;
         this.thumbnailUrl = thumbnailUrl;
         this.imageUrl = imageUrl;
+        this.maxPlayers = maxPlayers;
         this.description = description;
     }
 
@@ -42,6 +44,10 @@ public class GameInformation {
 
     public String getImageUrl() {
         return imageUrl;
+    }
+
+    public int getMaxPlayers() {
+        return maxPlayers;
     }
 
     public String getDescription() {

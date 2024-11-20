@@ -1,6 +1,11 @@
 package projektek.GameSite.models.data.game.tictactoe;
 
+import projektek.GameSite.models.data.game.fitw.FITW;
+
+import java.util.Objects;
+
 public class TicTacToe {
+    private Long id;
     private PiecesTicTacToe[][] board;
     private boolean isXTurn;
     private boolean gameMode; //true = PvP : false = PvC
@@ -33,6 +38,19 @@ public class TicTacToe {
             }
         }
         return clonedBoard;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TicTacToe ticTacToe = (TicTacToe) o;
+        return Objects.equals(id, ticTacToe.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     public PiecesTicTacToe[][] getBoard() {

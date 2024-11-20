@@ -28,6 +28,7 @@ public class GameInformationInitializer {
                         "/fly-in-the-web",
                         env.get("APP_URL") + "thumbnails/fitw_thumbnail.jpg",
                         env.get("APP_URL") + "images/fitw_background.jpg",
+                        2,
                         "Init"
                 ));
             }
@@ -37,6 +38,7 @@ public class GameInformationInitializer {
                         "/tic-tac-toe",
                         env.get("APP_URL") + "thumbnails/tictactoe_thumbnail.jpeg",
                         env.get("APP_URL") + "images/tictactoe_background.jpg",
+                        2,
                         "Init"
                 ));
             }

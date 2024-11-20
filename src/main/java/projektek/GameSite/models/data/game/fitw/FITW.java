@@ -1,5 +1,6 @@
 package projektek.GameSite.models.data.game.fitw;
 
+import java.util.Objects;
 import java.util.Random;
 
 public class FITW {
@@ -33,6 +34,19 @@ public class FITW {
         pieceWon = 0;
         flyStepsDone = 0;
         spiderStepsDone = 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FITW fitw = (FITW) o;
+        return Objects.equals(id, fitw.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     public FieldFITW[] getField() {
