@@ -1,7 +1,5 @@
 package projektek.GameSite.models.data.game.tictactoe;
 
-import projektek.GameSite.models.data.game.fitw.FITW;
-
 import java.util.Objects;
 
 public class TicTacToe {

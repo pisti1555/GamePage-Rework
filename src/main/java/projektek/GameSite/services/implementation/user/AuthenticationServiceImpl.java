@@ -1,4 +1,4 @@
-package projektek.GameSite.services.implementation;
+package projektek.GameSite.services.implementation.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,9 +15,9 @@ import projektek.GameSite.exceptions.UnauthorizedException;
 import projektek.GameSite.exceptions.UnexpectedException;
 import projektek.GameSite.models.data.user.Role;
 import projektek.GameSite.models.data.user.User;
-import projektek.GameSite.models.repositories.RoleRepository;
-import projektek.GameSite.models.repositories.UserRepository;
-import projektek.GameSite.services.interfaces.AuthenticationService;
+import projektek.GameSite.models.repositories.user.RoleRepository;
+import projektek.GameSite.models.repositories.user.UserRepository;
+import projektek.GameSite.services.interfaces.user.AuthenticationService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -99,15 +99,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             String token = jwtService.generateToken(dto.getUsername());
             return new AuthenticatedUserDto(authentication.getName(), token);
         } catch (BadCredentialsException e) {
-            User user = userRepository.findByUsername(dto.getUsername());
-            Map<String, String> errors = new HashMap<>();
-            if (user == null) {
-                errors.put("username", "User does not exist");
-            } else if (!encoder.matches(dto.getPassword(), user.getPassword())) {
-                errors.put("password", "Invalid password");
+            User user = userRepository.findByUsername(dto.getUsername()).orElseThrow(
+                    () -> new UnauthorizedException(
+                            "Authentication failed",
+                            Map.of("username", "User does not exist")
+                    )
+            );
+            if (!encoder.matches(dto.getPassword(), user.getPassword())) {
+                throw new UnauthorizedException(
+                        "Authentication failed",
+                        Map.of("password", "Invalid password")
+                );
             }
 
-            throw new UnauthorizedException("Authentication failed", errors);
+            throw new UnauthorizedException();
         } catch (Exception e) {
             throw new UnexpectedException();
         }

@@ -6,8 +6,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import projektek.GameSite.models.data.game.GameInformation;
-import projektek.GameSite.models.data.user.Role;
-import projektek.GameSite.models.repositories.GameInformationRepository;
+import projektek.GameSite.models.repositories.game.GameInformationRepository;
 
 @Component
 public class GameInformationInitializer {

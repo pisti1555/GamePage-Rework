@@ -1,4 +1,4 @@
-package projektek.GameSite.services.interfaces;
+package projektek.GameSite.services.interfaces.user;
 
 import org.springframework.security.core.userdetails.UserDetailsService;
 import projektek.GameSite.dtos.UserDto;

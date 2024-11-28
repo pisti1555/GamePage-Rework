@@ -1,6 +1,6 @@
 package projektek.GameSite.dtos;
 
-import java.util.List;
+import projektek.GameSite.models.data.user.User;
 
 public class UserDto {
     private Long id;
@@ -12,15 +12,14 @@ public class UserDto {
     private String description;
 
     public UserDto() {}
-
-    public UserDto(Long id, String username, String email, String firstName, String lastName, String avatar, String description) {
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.avatar = avatar;
-        this.description = description;
+    public UserDto(User user) {
+        this.id = user.getId();
+        this.username = user.getUsername();
+        this.email = user.getEmail();
+        this.firstName = user.getFirstName();
+        this.lastName = user.getLastName();
+        this.avatar = user.getAvatar();
+        this.description = user.getDescription();
     }
 
     public Long getId() {

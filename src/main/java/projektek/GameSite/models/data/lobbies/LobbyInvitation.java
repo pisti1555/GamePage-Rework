@@ -1,4 +1,4 @@
-package projektek.GameSite.models.data.game.lobbies;
+package projektek.GameSite.models.data.lobbies;
 
 import projektek.GameSite.models.data.user.User;
 

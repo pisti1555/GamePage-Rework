@@ -21,6 +21,8 @@ public class FITW {
     public int flyStepsDone;
     public int spiderStepsDone;
 
+    private boolean saved;
+
 
 
     public FITW() {
@@ -34,6 +36,7 @@ public class FITW {
         pieceWon = 0;
         flyStepsDone = 0;
         spiderStepsDone = 0;
+        this.saved = false;
     }
 
     @Override
@@ -151,5 +154,13 @@ public class FITW {
         }
 
         return clonedBoard;
+    }
+
+    public boolean isSaved() {
+        return saved;
+    }
+
+    public void setSaved(boolean saved) {
+        this.saved = saved;
     }
 }

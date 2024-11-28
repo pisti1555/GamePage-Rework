@@ -14,9 +14,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import projektek.GameSite.controllers.ApiResponse;
-import projektek.GameSite.services.implementation.JwtService;
-import projektek.GameSite.services.implementation.UserServiceImpl;
+import projektek.GameSite.controllers.CustomResponse;
+import projektek.GameSite.services.implementation.user.JwtService;
+import projektek.GameSite.services.implementation.user.UserServiceImpl;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -84,8 +84,8 @@ public class JwtFilter extends OncePerRequestFilter {
         response.setStatus(401);
         Map<String, String> errors = new HashMap<>();
         errors.put("jwt", message);
-        ApiResponse apiResponse = new ApiResponse("error", message, null, errors);
+        CustomResponse customResponse = new CustomResponse(message, null, errors);
 
-        response.getWriter().write(new ObjectMapper().writeValueAsString(apiResponse));
+        response.getWriter().write(new ObjectMapper().writeValueAsString(customResponse));
     }
 }

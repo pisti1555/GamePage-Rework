@@ -1,7 +1,7 @@
-package projektek.GameSite.models.repositories;
+package projektek.GameSite.models.repositories.lobby;
 
 import projektek.GameSite.models.data.game.GameInformation;
-import projektek.GameSite.models.data.game.lobbies.Lobby;
+import projektek.GameSite.models.data.lobbies.Lobby;
 import projektek.GameSite.models.data.user.User;
 
 public interface LobbyRepository {

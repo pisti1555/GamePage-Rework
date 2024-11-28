@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import projektek.GameSite.dtos.auth.AuthenticatedUserDto;
 import projektek.GameSite.dtos.auth.LoginDto;
 import projektek.GameSite.dtos.auth.RegistrationDto;
-import projektek.GameSite.services.interfaces.AuthenticationService;
+import projektek.GameSite.services.interfaces.user.AuthenticationService;
 
 @RestController
 public class AuthenticationController {
@@ -24,7 +24,7 @@ public class AuthenticationController {
     public ResponseEntity<Object> register (@RequestBody RegistrationDto dto) {
         AuthenticatedUserDto user = service.register(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                new ApiResponse("success", "You have registered successfully", user)
+                new CustomResponse("You have registered successfully", user)
         );
     }
 
@@ -32,7 +32,7 @@ public class AuthenticationController {
     public ResponseEntity<Object> login(@RequestBody LoginDto dto) {
         AuthenticatedUserDto user = service.login(dto);
         return ResponseEntity.status(HttpStatus.OK).body(
-                new ApiResponse("success", "You have logged in successfully", user)
+                new CustomResponse("You have logged in successfully", user)
         );
     }
 

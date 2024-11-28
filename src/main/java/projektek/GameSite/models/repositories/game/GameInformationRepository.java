@@ -1,4 +1,4 @@
-package projektek.GameSite.models.repositories;
+package projektek.GameSite.models.repositories.game;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import projektek.GameSite.models.data.game.GameInformation;

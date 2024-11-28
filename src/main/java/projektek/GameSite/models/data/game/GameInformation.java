@@ -17,7 +17,11 @@ public class GameInformation {
 
     public GameInformation() {}
 
-    public GameInformation(String name, String url, String thumbnailUrl, String imageUrl, int maxPlayers, String description) {
+    public GameInformation(
+            String name, String url,
+            String thumbnailUrl, String imageUrl,
+            int maxPlayers, String description
+    ) {
         this.name = name;
         this.url = url;
         this.thumbnailUrl = thumbnailUrl;

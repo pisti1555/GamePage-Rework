@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import projektek.GameSite.dtos.GameStatsDto;
 import projektek.GameSite.models.data.game.GameInformation;
-import projektek.GameSite.models.repositories.GameInformationRepository;
+import projektek.GameSite.models.repositories.game.GameInformationRepository;
 import projektek.GameSite.services.interfaces.GamesService;
 
 import java.util.List;
@@ -28,18 +28,18 @@ public class GamesController {
     @GetMapping
     public ResponseEntity<Object> getGames() {
         List<GameInformation> games = gameInformationRepository.findAll();
-        return ResponseEntity.ok().body(new ApiResponse("success", "List of all existing games in the API", games));
+        return ResponseEntity.ok().body(new CustomResponse("List of all existing games in the API", games));
     }
 
     @GetMapping("/stats/{game}")
     public ResponseEntity<Object> getGameStatsOfAllUsers(@PathVariable String game) {
         List<GameStatsDto> stats = gamesService.getStatsOfAllUsers(game);
-        return ResponseEntity.ok().body(new ApiResponse("success", "Stats of player in all games", stats));
+        return ResponseEntity.ok().body(new CustomResponse("Stats of player in all games", stats));
     }
 
     @GetMapping("/stats/{game}/{username}")
     public ResponseEntity<Object> getGameStatsOfUser(@PathVariable String game, @PathVariable String username) {
         GameStatsDto stat = gamesService.findStatsByUsername(username, game);
-        return ResponseEntity.ok().body(new ApiResponse("success", "Stats of player in all games", stat));
+        return ResponseEntity.ok().body(new CustomResponse("Stats of player in all games", stat));
     }
 }

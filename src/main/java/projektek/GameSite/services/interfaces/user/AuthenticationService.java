@@ -1,4 +1,4 @@
-package projektek.GameSite.services.interfaces;
+package projektek.GameSite.services.interfaces.user;
 
 import projektek.GameSite.dtos.auth.AuthenticatedUserDto;
 import projektek.GameSite.dtos.auth.LoginDto;

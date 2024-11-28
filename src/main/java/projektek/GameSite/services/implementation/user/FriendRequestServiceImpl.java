@@ -1,4 +1,4 @@
-package projektek.GameSite.services.implementation;
+package projektek.GameSite.services.implementation.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,8 +9,8 @@ import projektek.GameSite.models.data.user.friends.Friend;
 import projektek.GameSite.models.data.user.friends.FriendRequest;
 import projektek.GameSite.models.repositories.FriendRepository;
 import projektek.GameSite.models.repositories.FriendRequestRepository;
-import projektek.GameSite.services.interfaces.FriendRequestService;
-import projektek.GameSite.services.interfaces.UserService;
+import projektek.GameSite.services.interfaces.user.FriendRequestService;
+import projektek.GameSite.services.interfaces.user.UserService;
 
 import java.util.HashMap;
 import java.util.List;

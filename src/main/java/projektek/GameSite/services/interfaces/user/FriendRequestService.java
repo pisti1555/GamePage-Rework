@@ -1,7 +1,6 @@
-package projektek.GameSite.services.interfaces;
+package projektek.GameSite.services.interfaces.user;
 
 import projektek.GameSite.models.data.user.User;
-import projektek.GameSite.models.data.user.friends.FriendRequest;
 
 import java.util.List;
 

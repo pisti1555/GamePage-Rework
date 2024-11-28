@@ -15,7 +15,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import projektek.GameSite.services.interfaces.UserService;
+import projektek.GameSite.services.interfaces.user.UserService;
 
 @Configuration
 @EnableWebSecurity

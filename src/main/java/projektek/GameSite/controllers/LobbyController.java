@@ -4,9 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import projektek.GameSite.dtos.LobbyDto;
+import projektek.GameSite.dtos.LobbyInvitationDto;
 import projektek.GameSite.models.data.user.User;
 import projektek.GameSite.services.interfaces.LobbyService;
-import projektek.GameSite.services.interfaces.UserService;
+import projektek.GameSite.services.interfaces.user.UserService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/lobby")
@@ -24,8 +27,8 @@ public class LobbyController {
     public ResponseEntity<Object> getLobby() {
         User user = userService.getUserByAuth();
         LobbyDto lobby = lobbyService.getLobby(user);
-        return ResponseEntity.ok().body(new ApiResponse(
-                "success", "Lobby returned", lobby)
+        return ResponseEntity.ok().body(new CustomResponse(
+                "Lobby returned", lobby)
         );
     }
 
@@ -33,8 +36,8 @@ public class LobbyController {
     public ResponseEntity<Object> create(@PathVariable Long gameId) {
         User user = userService.getUserByAuth();
         LobbyDto lobby = lobbyService.getOrCreate(user, gameId);
-        return ResponseEntity.ok().body(new ApiResponse(
-                "success", "Lobby created", lobby)
+        return ResponseEntity.ok().body(new CustomResponse(
+                "Lobby created", lobby)
         );
     }
 
@@ -43,8 +46,17 @@ public class LobbyController {
         User user = userService.getUserByAuth();
         User friend = userService.getUserByUsername(friendUsername);
         lobbyService.inviteFriend(user, friend);
-        return ResponseEntity.ok().body(new ApiResponse(
-                "success", "Friend invited", null)
+        return ResponseEntity.ok().body(new CustomResponse(
+                "Friend invited", null)
+        );
+    }
+
+    @GetMapping("/invitations")
+    public ResponseEntity<Object> getInvitations() {
+        User user = userService.getUserByAuth();
+        List<LobbyInvitationDto> invitations = lobbyService.getInvitations(user);
+        return ResponseEntity.ok().body(new CustomResponse(
+                "List of lobby invitations", invitations)
         );
     }
 
@@ -52,8 +64,16 @@ public class LobbyController {
     public ResponseEntity<Object> joinLobby(@PathVariable Long lobbyId) {
         User user = userService.getUserByAuth();
         LobbyDto lobby = lobbyService.joinLobby(lobbyId, user);
-        return ResponseEntity.ok().body(new ApiResponse(
-                "success", "Joined to lobby", lobby)
+        return ResponseEntity.ok().body(new CustomResponse(
+                "Joined to lobby", lobby)
+        );
+    }
+
+    @PostMapping("/{invitationId}/decline")
+    public ResponseEntity<Object> declineInvitation(@PathVariable Long invitationId) {
+        lobbyService.declineInvitation(invitationId);
+        return ResponseEntity.ok().body(new CustomResponse(
+                "Joined to lobby", lobbyService.getInvitations(userService.getUserByAuth()))
         );
     }
 
@@ -61,8 +81,8 @@ public class LobbyController {
     public ResponseEntity<Object> leaveLobby() {
         User user = userService.getUserByAuth();
         lobbyService.leaveLobby(user);
-        return ResponseEntity.ok().body(new ApiResponse(
-                "success", "Left lobby", null)
+        return ResponseEntity.ok().body(new CustomResponse(
+                "Left lobby", null)
         );
     }
 
@@ -71,8 +91,8 @@ public class LobbyController {
         User admin = userService.getUserByAuth();
         User user = userService.getUserByUsername(username);
         lobbyService.kickPlayerFromLobby(admin, user);
-        return ResponseEntity.ok().body(new ApiResponse(
-                "success", "Player kicked from lobby", null)
+        return ResponseEntity.ok().body(new CustomResponse(
+                "Player kicked from lobby", null)
         );
     }
 
@@ -80,8 +100,8 @@ public class LobbyController {
     public ResponseEntity<Object> readyUp() {
         User user = userService.getUserByAuth();
         lobbyService.readyUp(user);
-        return ResponseEntity.ok().body(new ApiResponse(
-                "success", "Ready", null)
+        return ResponseEntity.ok().body(new CustomResponse(
+                "Ready", null)
         );
     }
 
@@ -89,8 +109,8 @@ public class LobbyController {
     public ResponseEntity<Object> unready() {
         User user = userService.getUserByAuth();
         lobbyService.unready(user);
-        return ResponseEntity.ok().body(new ApiResponse(
-                "success", "Unready", null)
+        return ResponseEntity.ok().body(new CustomResponse(
+                "Unready", null)
         );
     }
 
@@ -98,8 +118,8 @@ public class LobbyController {
     public ResponseEntity<Object> startGame() {
         User user = userService.getUserByAuth();
         lobbyService.startGame(user);
-        return ResponseEntity.ok().body(new ApiResponse(
-                "success", "Game started", null)
+        return ResponseEntity.ok().body(new CustomResponse(
+                "Game started", null)
         );
     }
 }

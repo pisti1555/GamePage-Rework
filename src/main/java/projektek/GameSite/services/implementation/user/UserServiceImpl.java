@@ -1,4 +1,4 @@
-package projektek.GameSite.services.implementation;
+package projektek.GameSite.services.implementation.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -6,13 +6,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import projektek.GameSite.dtos.Mapper;
 import projektek.GameSite.dtos.UserDto;
 import projektek.GameSite.exceptions.NotFoundException;
 import projektek.GameSite.exceptions.UnauthorizedException;
 import projektek.GameSite.models.data.user.User;
-import projektek.GameSite.models.repositories.UserRepository;
-import projektek.GameSite.services.interfaces.UserService;
+import projektek.GameSite.models.repositories.user.UserRepository;
+import projektek.GameSite.services.interfaces.user.UserService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,19 +22,22 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository repository;
-    private final Mapper mapper;
 
     @Autowired
-    public UserServiceImpl(UserRepository repository, Mapper mapper) {
+    public UserServiceImpl(UserRepository repository) {
         this.repository = repository;
-        this.mapper = mapper;
     }
 
     @Override
     public User getUserByAuth() {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            return repository.findByUsername(auth.getName());
+            return repository.findByUsername(auth.getName()).orElseThrow(
+                    () -> new UnauthorizedException(
+                            "Please log in",
+                            Map.of("user", "You are unauthenticated")
+                    )
+            );
         } catch (Exception e) {
             Map<String, String> errors = new HashMap<>();
             errors.put("Authorization", "You are unauthenticated");
@@ -57,37 +59,40 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserByUsername(String username) {
         Map<String, String> errors = new HashMap<>();
-        User user = repository.findByUsername(username);
-        if (user == null) {
-            errors.put("user", "Could not find user by username");
-            throw new NotFoundException(errors);
-        }
-        return user;
+        return repository.findByUsername(username).orElseThrow(
+                () -> new NotFoundException(
+                        "User was not found",
+                        Map.of("user", "Could not find user by username")
+                )
+        );
     }
 
     @Override
     public User getUserByEmail(String email) {
         Map<String, String> errors = new HashMap<>();
-        User user = repository.findByEmail(email);
-        if (user == null) {
-            errors.put("user", "Could not find user by e-mail");
-            throw new NotFoundException(errors);
-        }
-        return user;
+        return repository.findByEmail(email).orElseThrow(
+                () -> new NotFoundException(
+                        "User was not found",
+                        Map.of("user", "Could not find user by email")
+                )
+        );
     }
 
     @Override
     public List<UserDto> getAllUsers() {
         return repository.findAll()
                 .stream()
-                .map(user -> mapper.map(user, UserDto.class))
+                .map(user -> new UserDto(user))
                 .collect(Collectors.toList());
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = repository.findByUsername(username);
-        if (user == null) throw new UsernameNotFoundException("User not found");
-        return user;
+        return repository.findByUsername(username).orElseThrow(
+                () -> new NotFoundException(
+                        "User was not found",
+                        Map.of("user", "Could not find user by username")
+                )
+        );
     }
 }

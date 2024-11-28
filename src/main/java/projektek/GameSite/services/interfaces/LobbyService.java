@@ -1,7 +1,10 @@
 package projektek.GameSite.services.interfaces;
 
 import projektek.GameSite.dtos.LobbyDto;
+import projektek.GameSite.dtos.LobbyInvitationDto;
 import projektek.GameSite.models.data.user.User;
+
+import java.util.List;
 
 public interface LobbyService {
     LobbyDto getLobby(User user);
@@ -11,8 +14,8 @@ public interface LobbyService {
     LobbyDto joinLobby(Long lobbyId, User user);
     void readyUp(User user);
     void unready(User user);
-    boolean isAllReady(User user);
     void inviteFriend(User inviter, User invited);
+    List<LobbyInvitationDto> getInvitations(User invited);
     void declineInvitation(Long id);
     void startGame(User user);
 }

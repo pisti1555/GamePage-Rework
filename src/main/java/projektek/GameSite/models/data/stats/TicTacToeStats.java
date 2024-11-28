@@ -1,11 +1,11 @@
-package projektek.GameSite.models.data.game.stats;
+package projektek.GameSite.models.data.stats;
 
 import jakarta.persistence.*;
 import projektek.GameSite.models.data.user.User;
 
 @Entity
-@Table(name = "stats_fitw")
-public class FitwStats {
+@Table(name = "stats_tic_tac_toe")
+public class TicTacToeStats {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -17,7 +17,7 @@ public class FitwStats {
     private int won;
     private int moves;
 
-    public FitwStats(User user) {
+    public TicTacToeStats(User user) {
         this.won = 0;
         this.moves = 0;
         this.played = 0;
@@ -25,7 +25,7 @@ public class FitwStats {
         this.username = user.getUsername();
     }
 
-    public FitwStats() {}
+    public TicTacToeStats() {}
 
     public Long getId() {
         return id;

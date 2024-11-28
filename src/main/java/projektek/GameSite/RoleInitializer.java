@@ -5,7 +5,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import projektek.GameSite.models.data.user.Role;
-import projektek.GameSite.models.repositories.RoleRepository;
+import projektek.GameSite.models.repositories.user.RoleRepository;
 
 @Component
 public class RoleInitializer {

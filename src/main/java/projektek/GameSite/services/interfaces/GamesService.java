@@ -1,7 +1,7 @@
 package projektek.GameSite.services.interfaces;
 
-import org.springframework.stereotype.Service;
 import projektek.GameSite.dtos.GameStatsDto;
+import projektek.GameSite.models.data.user.User;
 
 import java.util.List;
 

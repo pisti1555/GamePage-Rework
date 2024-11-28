@@ -1,6 +1,6 @@
-package projektek.GameSite.models.data.game.lobbies;
+package projektek.GameSite.models.data.lobbies;
 
-import projektek.GameSite.models.data.game.tictactoe.TicTacToe;
+import net.minidev.json.annotate.JsonIgnore;
 import projektek.GameSite.models.data.user.User;
 
 import java.util.ArrayList;
@@ -11,24 +11,22 @@ public class Lobby {
     Long id;
     private Long gameId;
     private String gameName;
-    private User admin;
-    private List<User> members;
+    private final List<User> members;
     private int maxPlayers;
-    private List<User> readyMembers;
-    private boolean isReady;
-    private boolean isStarted;
+    private final List<User> readyMembers;
+    private final List<User> inGameMembers;
+    @JsonIgnore
+    private Object board;
 
     public Lobby(Long id, User user, Long gameId, String gameName, int maxPlayers) {
         this.id = id;
         this.members = new ArrayList<>();
-        this.admin = user;
         this.members.add(user);
         this.gameId = gameId;
         this.gameName = gameName;
         this.maxPlayers = maxPlayers;
         this.readyMembers = new ArrayList<>();
-        this.isReady = false;
-        this.isStarted = false;
+        this.inGameMembers = new ArrayList<>();
     }
 
     @Override
@@ -84,27 +82,15 @@ public class Lobby {
         return readyMembers;
     }
 
-    public boolean isReady() {
-        return isReady;
+    public Object getBoard() {
+        return board;
     }
 
-    public void setReady(boolean ready) {
-        isReady = ready;
+    public void setBoard(Object board) {
+        this.board = board;
     }
 
-    public User getAdmin() {
-        return admin;
-    }
-
-    public void setAdmin(User admin) {
-        this.admin = admin;
-    }
-
-    public boolean isStarted() {
-        return isStarted;
-    }
-
-    public void setStarted(boolean started) {
-        isStarted = started;
+    public List<User> getInGameMembers() {
+        return inGameMembers;
     }
 }

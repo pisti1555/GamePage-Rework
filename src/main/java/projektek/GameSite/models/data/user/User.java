@@ -4,9 +4,8 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import projektek.GameSite.models.data.game.stats.FitwStats;
-import projektek.GameSite.models.data.game.stats.TicTacToeStats;
-import projektek.GameSite.models.data.user.friends.FriendRequest;
+import projektek.GameSite.models.data.stats.FitwStats;
+import projektek.GameSite.models.data.stats.TicTacToeStats;
 
 import java.util.Collection;
 import java.util.HashSet;

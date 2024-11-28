@@ -1,36 +1,41 @@
 package projektek.GameSite.dtos;
 
+import projektek.GameSite.models.data.lobbies.Lobby;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class LobbyDto {
     private final Long id;
-    private final UserDto admin;
     private final List<UserDto> members;
     private final List<UserDto> readyMembers;
+    private final List<UserDto> inGameMembers;
     private final String gameName;
     private final Long gameId;
     private final int maxPlayers;
-    private final boolean isReady;
-    private final boolean isStarted;
 
-    public LobbyDto(Long id, UserDto admin, List<UserDto> members, List<UserDto> readyMembers, String gameName, Long gameId, int maxPlayers, boolean isReady, boolean isStarted) {
-        this.id = id;
-        this.admin = admin;
-        this.members = members;
-        this.readyMembers = readyMembers;
-        this.gameName = gameName;
-        this.gameId = gameId;
-        this.maxPlayers = maxPlayers;
-        this.isReady = isReady;
-        this.isStarted = isStarted;
+    public LobbyDto(Lobby lobby) {
+        this.id = lobby.getId();
+        this.gameName = lobby.getGameName();
+        this.gameId = lobby.getGameId();
+        this.maxPlayers = lobby.getMaxPlayers();
+        this.members = new ArrayList<>();
+        this.readyMembers = new ArrayList<>();
+        this.inGameMembers = new ArrayList<>();
+
+        lobby.getMembers().forEach(member -> {
+            members.add(new UserDto(member));
+        });
+        lobby.getReadyMembers().forEach(member -> {
+            readyMembers.add(new UserDto(member));
+        });
+        lobby.getInGameMembers().forEach(member -> {
+            inGameMembers.add(new UserDto(member));
+        });
     }
 
     public Long getId() {
         return id;
-    }
-
-    public UserDto getAdmin() {
-        return admin;
     }
 
     public List<UserDto> getMembers() {
@@ -53,11 +58,7 @@ public class LobbyDto {
         return maxPlayers;
     }
 
-    public boolean isReady() {
-        return isReady;
-    }
-
-    public boolean isStarted() {
-        return isStarted;
+    public List<UserDto> getInGameMembers() {
+        return inGameMembers;
     }
 }
