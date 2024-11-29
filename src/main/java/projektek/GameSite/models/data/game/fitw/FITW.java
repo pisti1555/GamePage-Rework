@@ -4,38 +4,33 @@ import java.util.Objects;
 import java.util.Random;
 
 public class FITW {
-    public Long id;
-    public final FieldFITW[] field;
-    public final PieceFITW fly;
-    public final PieceFITW[] spider;
+    private Long id;
+    private final FieldFITW[] field;
+    private final PieceFITW fly;
+    private final PieceFITW[] spider;
 
-
-    public short gameMode;
-    public final short PVP = 1;
-    public final short PVS = 2;
-    public final short PVF = 3;
-    public final Random random;
-    public boolean isGameRunning;
-    public boolean isFlysTurn;
-    public int pieceWon;
-    public int flyStepsDone;
-    public int spiderStepsDone;
+    private final Random random;
+    private boolean isGameRunning;
+    private boolean isFlysTurn;
+    private int pieceWon;
+    private int flyMoves;
+    private int spiderMoves;
 
     private boolean saved;
 
 
 
     public FITW() {
-        random = new Random();
+        this.random = new Random();
         CreateBoardFITW cb = new CreateBoardFITW();
-        field = cb.giveField();
-        fly = cb.giveFly();
-        spider = cb.giveSpiders();
-        isGameRunning = true;
-        isFlysTurn = true;
-        pieceWon = 0;
-        flyStepsDone = 0;
-        spiderStepsDone = 0;
+        this.field = cb.giveField();
+        this.fly = cb.giveFly();
+        this.spider = cb.giveSpiders();
+        this.isGameRunning = true;
+        this.isFlysTurn = true;
+        this.pieceWon = 0;
+        this.flyMoves = 0;
+        this.spiderMoves = 0;
         this.saved = false;
     }
 
@@ -73,26 +68,6 @@ public class FITW {
         this.id = id;
     }
 
-    public short getGameMode() {
-        return gameMode;
-    }
-
-    public void setGameMode(short gameMode) {
-        this.gameMode = gameMode;
-    }
-
-    public short getPVP() {
-        return PVP;
-    }
-
-    public short getPVS() {
-        return PVS;
-    }
-
-    public short getPVF() {
-        return PVF;
-    }
-
     public Random getRandom() {
         return random;
     }
@@ -121,20 +96,20 @@ public class FITW {
         this.pieceWon = pieceWon;
     }
 
-    public int getFlyStepsDone() {
-        return flyStepsDone;
+    public int getFlyMoves() {
+        return flyMoves;
     }
 
-    public void setFlyStepsDone(int flyStepsDone) {
-        this.flyStepsDone = flyStepsDone;
+    public void setFlyMoves(int flyMoves) {
+        this.flyMoves = flyMoves;
     }
 
-    public int getSpiderStepsDone() {
-        return spiderStepsDone;
+    public int getSpiderMoves() {
+        return spiderMoves;
     }
 
-    public void setSpiderStepsDone(int spiderStepsDone) {
-        this.spiderStepsDone = spiderStepsDone;
+    public void setSpiderMoves(int spiderMoves) {
+        this.spiderMoves = spiderMoves;
     }
 
     public FieldFITW[] cloneBoard() {

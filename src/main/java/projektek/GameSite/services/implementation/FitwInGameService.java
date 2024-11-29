@@ -15,10 +15,7 @@ import projektek.GameSite.models.repositories.lobby.LobbyRepository;
 import projektek.GameSite.models.repositories.user.UserRepository;
 import projektek.GameSite.services.interfaces.user.UserService;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class FitwInGameService {
@@ -47,9 +44,9 @@ public class FitwInGameService {
                 if (isMoveValid(from, to)) {
                     board.getField()[to].setPiece(board.getField()[from].getPiece());
                     board.getField()[from].setPiece(PiecesFITW.EMPTY);
-                    board.getFly().location = to;
-                    board.isFlysTurn = false;
-                    board.flyStepsDone++;
+                    board.getFly().setLocation(to);
+                    board.setFlysTurn(false);
+                    board.setFlyMoves(board.getFlyMoves() + 1);
                 }
             }
         }
@@ -59,9 +56,9 @@ public class FitwInGameService {
                     if (isMoveValid(from, to)) {
                         board.getField()[to].setPiece(board.getField()[from].getPiece());
                         board.getField()[from].setPiece(PiecesFITW.EMPTY);
-                        p.location = to;
-                        board.isFlysTurn = true;
-                        board.spiderStepsDone++;
+                        p.setLocation(to);
+                        board.setFlysTurn(true);
+                        board.setSpiderMoves(board.getSpiderMoves() + 1);
                     }
                 }
             }
@@ -74,13 +71,13 @@ public class FitwInGameService {
         boolean correctPiece = false;
         FITW board = getBoardByAuth();
 
-        if(board.isFlysTurn) {
-            if (from == board.getFly().location) {
+        if(board.isFlysTurn()) {
+            if (from == board.getFly().getLocation()) {
                 correctPiece = true;
             } else return false;
         } else {
             for (int i = 0; i < board.getSpider().length; i++) {
-                if (from == board.getSpider()[i].location) correctPiece = true;
+                if (from == board.getSpider()[i].getLocation()) correctPiece = true;
             }
         }
 
@@ -101,9 +98,9 @@ public class FitwInGameService {
         FITW board = getBoardByAuth();
 
         int[] loc = new int[board.getSpider().length + 1];
-        loc[0] = board.getFly().location;
+        loc[0] = board.getFly().getLocation();
         for (int i = 1; i < board.getSpider().length + 1; i++) {
-            loc[i] = board.getSpider()[i-1].location;
+            loc[i] = board.getSpider()[i-1].getLocation();
         }
 
         return loc;
@@ -113,9 +110,9 @@ public class FitwInGameService {
         FITW board = getBoardByAuth();
 
         int availableFields = 0;
-        for (int i = 0; i < board.getField()[board.getFly().location].getConnections().size(); i++) {
+        for (int i = 0; i < board.getField()[board.getFly().getLocation()].getConnections().size(); i++) {
             if(
-                    board.getField()[board.getFly().location].getConnections().get(i).getPiece() == PiecesFITW.EMPTY
+                    board.getField()[board.getFly().getLocation()].getConnections().get(i).getPiece() == PiecesFITW.EMPTY
             ) availableFields++;
         }
         return availableFields;
@@ -140,9 +137,9 @@ public class FitwInGameService {
 
         PieceFITW pieceToReturn = null;
         for (PieceFITW p: board.getSpider()) {
-            if (p.location == location) pieceToReturn = p;
+            if (p.getLocation() == location) pieceToReturn = p;
         }
-        if (board.getFly().location == location) pieceToReturn = board.getFly();
+        if (board.getFly().getLocation() == location) pieceToReturn = board.getFly();
 
         return pieceToReturn;
     }
@@ -150,27 +147,22 @@ public class FitwInGameService {
     public int checkGameOver() {
         FITW board = getBoardByAuth();
         if (
-                board.getFly().location == 0 ||
-                        board.getFly().location == 5 ||
-                        board.getFly().location == 10 ||
-                        board.getFly().location == 14 ||
-                        board.getFly().location == 18 ||
-                        board.getFly().location == 22
+                Set.of(0, 5, 10, 14, 18, 22).contains(board.getFly().getLocation())
         ) {
-            board.isGameRunning = false;
-            board.pieceWon = 1;
+            board.setGameRunning(false);
+            board.setPieceWon(1);
         }
 
         int availableFields = howManyFieldsAreAvailable();
         if (availableFields == 0) {
-            board.isGameRunning = false;
-            board.pieceWon = 2;
+            board.setGameRunning(false);
+            board.setPieceWon(2);
         }
 
-        if (board.pieceWon != 0 && !board.isSaved()) {
+        if (board.getPieceWon() != 0 && !board.isSaved()) {
             gameOver();
         }
-        return board.pieceWon;
+        return board.getPieceWon();
     }
 
     public int gameOver() {
@@ -181,18 +173,18 @@ public class FitwInGameService {
         FitwStats user2Stats = user2.getFitwStats();
 
         if (checkGameOver() == 1) {
-            user1Stats.setMoves(user1Stats.getMoves() + ((FITW) lobby.getBoard()).flyStepsDone);
+            user1Stats.setMoves(user1Stats.getMoves() + ((FITW) lobby.getBoard()).getFlyMoves());
             user1Stats.setPlayed(user1Stats.getPlayed() + 1);
             user1Stats.setWon(user1Stats.getWon() + 1);
 
-            user2Stats.setMoves(user2Stats.getMoves() + ((FITW) lobby.getBoard()).spiderStepsDone);
+            user2Stats.setMoves(user2Stats.getMoves() + ((FITW) lobby.getBoard()).getSpiderMoves());
             user2Stats.setPlayed(user2Stats.getPlayed() + 1);
         } else if (checkGameOver() == 2) {
-            user2Stats.setMoves(user2Stats.getMoves() + ((FITW) lobby.getBoard()).spiderStepsDone);
+            user2Stats.setMoves(user2Stats.getMoves() + ((FITW) lobby.getBoard()).getSpiderMoves());
             user2Stats.setPlayed(user2Stats.getPlayed() + 1);
             user2Stats.setWon(user2Stats.getWon() + 1);
 
-            user1Stats.setMoves(user1Stats.getMoves() + ((FITW) lobby.getBoard()).flyStepsDone);
+            user1Stats.setMoves(user1Stats.getMoves() + ((FITW) lobby.getBoard()).getFlyMoves());
             user1Stats.setPlayed(user1Stats.getPlayed() + 1);
         }
 
@@ -208,11 +200,11 @@ public class FitwInGameService {
 
     public void newGame() {
         FITW board = new FITW();
-        board.isGameRunning = true;
-        board.pieceWon = 0;
-        board.isFlysTurn = true;
-        board.flyStepsDone = 0;
-        board.spiderStepsDone = 0;
+        board.setGameRunning(true);
+        board.setPieceWon(0);
+        board.setFlysTurn(true);
+        board.setFlyMoves(0);
+        board.setSpiderMoves(0);
 
         Lobby lobby = getLobbyByAuth();
         lobby.setBoard(board);
@@ -230,8 +222,8 @@ public class FitwInGameService {
                 new UserDto(member)
         ));
 
-        movesOfMembers.add(0, board.getFlyStepsDone());
-        movesOfMembers.add(1, board.getSpiderStepsDone());
+        movesOfMembers.add(0, board.getFlyMoves());
+        movesOfMembers.add(1, board.getSpiderMoves());
 
         return new GameStatusDto(
                 inGameMembers,
