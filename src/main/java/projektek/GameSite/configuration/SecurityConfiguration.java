@@ -42,6 +42,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(request -> request
                     .requestMatchers("/api/login", "/api/register").permitAll()
                     .requestMatchers("/thumbnails/**", "/images/**").permitAll()
+                    .requestMatchers("/ws/**", "/app/**").permitAll()
                     .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

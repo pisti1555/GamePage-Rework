@@ -1,6 +1,7 @@
 package projektek.GameSite.services.implementation;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import projektek.GameSite.dtos.GameStatusDto;
 import projektek.GameSite.dtos.LobbyDto;
@@ -22,16 +23,19 @@ public class FitwInGameService {
     private final LobbyRepository lobbyRepository;
     private final UserRepository userRepository;
     private final UserService userService;
+    private final SimpMessagingTemplate template;
 
     @Autowired
     public FitwInGameService(
             LobbyRepository lobbyRepository,
             UserRepository userRepository,
-            UserService userService
+            UserService userService,
+            SimpMessagingTemplate template
     ) {
         this.lobbyRepository = lobbyRepository;
         this.userRepository = userRepository;
         this.userService = userService;
+        this.template = template;
     }
 
     public int move(int from, int to) {
@@ -64,6 +68,7 @@ public class FitwInGameService {
             }
         }
 
+        update(lobby);
         return checkGameOver();
     }
 
@@ -245,5 +250,17 @@ public class FitwInGameService {
         Lobby lobby = getLobbyByAuth();
         lobby.getInGameMembers().remove(userService.getUserByAuth());
         return new LobbyDto(lobby);
+    }
+
+
+    public void update(Lobby lobby) {
+        template.convertAndSend("/topic/game/fitw", "update");
+
+        for (User u : lobby.getMembers()) {
+            Optional<User> user = userRepository.findById(u.getId());
+            if (user.isPresent()) {
+                template.convertAndSendToUser(user.get().getUsername(), "/topic/game/fitw", "update");
+            }
+        }
     }
 }

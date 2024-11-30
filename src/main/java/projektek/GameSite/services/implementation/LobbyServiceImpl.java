@@ -1,6 +1,7 @@
 package projektek.GameSite.services.implementation;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import projektek.GameSite.dtos.LobbyDto;
 import projektek.GameSite.dtos.LobbyInvitationDto;
@@ -17,6 +18,7 @@ import projektek.GameSite.models.data.user.User;
 import projektek.GameSite.models.repositories.game.GameInformationRepository;
 import projektek.GameSite.models.repositories.lobby.LobbyInvitationRepository;
 import projektek.GameSite.models.repositories.lobby.LobbyRepository;
+import projektek.GameSite.models.repositories.user.UserRepository;
 import projektek.GameSite.services.interfaces.LobbyService;
 
 import java.util.*;
@@ -25,17 +27,23 @@ import java.util.*;
 public class LobbyServiceImpl implements LobbyService {
     private final LobbyRepository lobbyRepository;
     private final LobbyInvitationRepository lobbyInvitationRepository;
+    private final UserRepository userRepository;
     private final GameInformationRepository gameInformationRepository;
+    private final SimpMessagingTemplate template;
 
     @Autowired
     public LobbyServiceImpl(
             LobbyRepository lobbyRepository,
             LobbyInvitationRepository lobbyInvitationRepository,
-            GameInformationRepository gameInformationRepository
+            UserRepository userRepository,
+            GameInformationRepository gameInformationRepository,
+            SimpMessagingTemplate template
     ) {
         this.lobbyRepository = lobbyRepository;
         this.lobbyInvitationRepository = lobbyInvitationRepository;
+        this.userRepository = userRepository;
         this.gameInformationRepository = gameInformationRepository;
+        this.template = template;
     }
 
     @Override
@@ -60,6 +68,7 @@ public class LobbyServiceImpl implements LobbyService {
     public void leaveLobby(User user) {
         Lobby lobby = lobbyRepository.getLobbyByAnyUser(user);
         lobbyRepository.removeUserFromLobby(lobby.getId(), user);
+        update(lobby);
     }
 
     @Override
@@ -79,6 +88,7 @@ public class LobbyServiceImpl implements LobbyService {
         }
 
         lobbyRepository.removeUserFromLobby(lobby.getId(), userToKick);
+        update(lobby);
     }
 
     @Override
@@ -109,6 +119,7 @@ public class LobbyServiceImpl implements LobbyService {
 
         lobbyInvitationRepository.deleteRequest(invitation.getInvitationId());
         lobbyRepository.addUserToLobby(lobbyId, user);
+        update(lobby);
         return new LobbyDto(lobby);
     }
 
@@ -117,6 +128,8 @@ public class LobbyServiceImpl implements LobbyService {
         Lobby lobby = lobbyRepository.getLobbyByAnyUser(user);
         if (!lobby.getReadyMembers().contains(user)) {
             lobby.getReadyMembers().add(user);
+
+            update(lobby);
         }
     }
 
@@ -124,12 +137,14 @@ public class LobbyServiceImpl implements LobbyService {
     public void unready(User user) {
         Lobby lobby = lobbyRepository.getLobbyByAnyUser(user);
         lobby.getReadyMembers().remove(user);
+        update(lobby);
     }
 
     @Override
     public void inviteFriend(User inviter, User invited) {
         Lobby lobby = lobbyRepository.getLobbyByAnyUser(inviter);
         lobbyInvitationRepository.save(inviter, invited, lobby.getId());
+        template.convertAndSendToUser(invited.getUsername(), "/topic/lobby", getInvitations(invited));
     }
 
     @Override
@@ -178,6 +193,7 @@ public class LobbyServiceImpl implements LobbyService {
 
         lobby.getReadyMembers().removeAll(lobby.getMembers());
         lobby.getInGameMembers().addAll(lobby.getMembers());
+        update(lobby);
     }
 
     private GameInformation findGameById(Long id) {
@@ -187,5 +203,18 @@ public class LobbyServiceImpl implements LobbyService {
                         Map.of("game", "Game does not exist")
                 )
         );
+    }
+
+    @Override
+    public void update(Lobby lobby) {
+        template.convertAndSend("/topic/lobby", "update");
+
+        for (User u : lobby.getMembers()) {
+            Optional<User> user = userRepository.findById(u.getId());
+            if (user.isPresent()) {
+                template.convertAndSendToUser(user.get().getUsername(), "/topic/lobby", "update");
+            }
+        }
+
     }
 }

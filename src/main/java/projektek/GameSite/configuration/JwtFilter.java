@@ -44,6 +44,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 || request.getRequestURI().equals("/api/register")
                 || request.getRequestURI().startsWith("/thumbnails/")
                 || request.getRequestURI().startsWith("/images/")
+                || request.getRequestURI().startsWith("/ws/")
         ) {
             filterChain.doFilter(request, response);
             return;
