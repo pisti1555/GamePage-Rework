@@ -6,11 +6,11 @@ public class TicTacToe {
     private Long id;
     private PiecesTicTacToe[][] board;
     private boolean isXTurn;
-    private boolean gameMode; //true = PvP : false = PvC
     private boolean isGameRunning;
     private PiecesTicTacToe winnerPiece;
     private int X_movesMade;
     private int O_movesMade;
+    private boolean saved;
 
 
     public TicTacToe() {
@@ -67,14 +67,6 @@ public class TicTacToe {
         isXTurn = XTurn;
     }
 
-    public boolean isGameMode() {
-        return gameMode;
-    }
-
-    public void setGameMode(boolean gameMode) {
-        this.gameMode = gameMode;
-    }
-
     public boolean isGameRunning() {
         return isGameRunning;
     }
@@ -105,5 +97,13 @@ public class TicTacToe {
 
     public void setO_movesMade(int o_movesMade) {
         O_movesMade = o_movesMade;
+    }
+
+    public boolean isSaved() {
+        return saved;
+    }
+
+    public void setSaved(boolean saved) {
+        this.saved = saved;
     }
 }

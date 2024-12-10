@@ -9,6 +9,7 @@ import projektek.GameSite.dtos.UserDto;
 import projektek.GameSite.exceptions.BadRequestException;
 import projektek.GameSite.exceptions.ForbiddenException;
 import projektek.GameSite.exceptions.NotFoundException;
+import projektek.GameSite.exceptions.UnexpectedException;
 import projektek.GameSite.models.data.game.GameInformation;
 import projektek.GameSite.models.data.game.fitw.FITW;
 import projektek.GameSite.models.data.lobbies.Lobby;
@@ -48,32 +49,48 @@ public class LobbyServiceImpl implements LobbyService {
 
     @Override
     public LobbyDto getLobby(User user) {
-        Lobby lobby = lobbyRepository.getLobbyByAnyUser(user);
-
+        Lobby lobby = lobbyRepository.getLobbyByAnyUser(user).orElseThrow(
+                () -> new NotFoundException(
+                        "Lobby was not found",
+                        Map.of("lobby", "Couldn't find lobby")
+                )
+        );
         return new LobbyDto(lobby);
     }
 
     @Override
     public LobbyDto getOrCreate(User user, Long gameId) {
         GameInformation game = findGameById(gameId);
-        try {
-            Lobby lobby = lobbyRepository.getLobbyByAnyUser(user);
+        Optional<Lobby> lobbyOpt = lobbyRepository.getLobbyByAnyUser(user);
+
+        if (lobbyOpt.isEmpty()) {
+            Lobby lobby = lobbyRepository.createLobby(user, game);
             return new LobbyDto(lobby);
-        } catch (NotFoundException e) {
-            return new LobbyDto(lobbyRepository.createLobby(user, game));
         }
+
+        throw new UnexpectedException();
     }
 
     @Override
     public void leaveLobby(User user) {
-        Lobby lobby = lobbyRepository.getLobbyByAnyUser(user);
+        Lobby lobby = lobbyRepository.getLobbyByAnyUser(user).orElseThrow(
+                () -> new NotFoundException(
+                        "Lobby was not found",
+                        Map.of("lobby", "Couldn't find the given lobby")
+                )
+        );
         lobbyRepository.removeUserFromLobby(lobby.getId(), user);
         update(lobby);
     }
 
     @Override
     public void kickPlayerFromLobby(User admin, User userToKick) {
-        Lobby lobby = lobbyRepository.getLobbyByAnyUser(admin);
+        Lobby lobby = lobbyRepository.getLobbyByAnyUser(admin).orElseThrow(
+                () -> new NotFoundException(
+                        "Lobby was not found",
+                        Map.of("lobby", "Couldn't find the given lobby")
+                )
+        );
         if (!lobby.getMembers().contains(userToKick)) {
             throw new BadRequestException(
                     "User is not in the lobby",
@@ -93,7 +110,12 @@ public class LobbyServiceImpl implements LobbyService {
 
     @Override
     public LobbyDto joinLobby(Long lobbyId, User user) {
-        Lobby lobby = lobbyRepository.getLobbyById(lobbyId);
+        Lobby lobby = lobbyRepository.getLobbyById(lobbyId).orElseThrow(
+                () -> new NotFoundException(
+                        "Lobby was not found",
+                        Map.of("lobby", "Couldn't find the given lobby")
+                )
+        );
         if (lobby.getMembers().size() >= lobby.getMaxPlayers()) {
             throw new BadRequestException(
                     "Lobby is full",
@@ -125,7 +147,12 @@ public class LobbyServiceImpl implements LobbyService {
 
     @Override
     public void readyUp(User user) {
-        Lobby lobby = lobbyRepository.getLobbyByAnyUser(user);
+        Lobby lobby = lobbyRepository.getLobbyByAnyUser(user).orElseThrow(
+                () -> new NotFoundException(
+                        "Lobby was not found",
+                        Map.of("lobby", "Couldn't find the given lobby")
+                )
+        );
         if (!lobby.getReadyMembers().contains(user)) {
             lobby.getReadyMembers().add(user);
 
@@ -135,14 +162,33 @@ public class LobbyServiceImpl implements LobbyService {
 
     @Override
     public void unready(User user) {
-        Lobby lobby = lobbyRepository.getLobbyByAnyUser(user);
+        Lobby lobby = lobbyRepository.getLobbyByAnyUser(user).orElseThrow(
+                () -> new NotFoundException(
+                        "Lobby was not found",
+                        Map.of("lobby", "Couldn't find the given lobby")
+                )
+        );
         lobby.getReadyMembers().remove(user);
         update(lobby);
     }
 
     @Override
     public void inviteFriend(User inviter, User invited) {
-        Lobby lobby = lobbyRepository.getLobbyByAnyUser(inviter);
+        Lobby lobby = lobbyRepository.getLobbyByAnyUser(inviter).orElseThrow(
+                () -> new NotFoundException(
+                        "Lobby was not found",
+                        Map.of("lobby", "Couldn't find the given lobby")
+                )
+        );
+
+        Optional<LobbyInvitation> invitation = lobbyInvitationRepository.getInvitationByUsers(inviter, invited);
+        if (invitation.isPresent()) {
+            throw new BadRequestException(
+                    "You have already invited this user",
+                    Map.of("invitation", "Already invited this user")
+            );
+        }
+
         lobbyInvitationRepository.save(inviter, invited, lobby.getId());
         template.convertAndSendToUser(invited.getUsername(), "/topic/lobby", getInvitations(invited));
     }
@@ -168,7 +214,13 @@ public class LobbyServiceImpl implements LobbyService {
 
     @Override
     public void startGame(User user) {
-        Lobby lobby = lobbyRepository.getLobbyByAnyUser(user);
+        Lobby lobby = lobbyRepository.getLobbyByAnyUser(user).orElseThrow(
+                () -> new NotFoundException(
+                        "Lobby was not found",
+                        Map.of("lobby", "Couldn't find the given lobby")
+                )
+        );
+
         if (!lobby.getMembers().get(0).equals(user)) {
             throw new ForbiddenException(
                     "No permission",
@@ -215,6 +267,5 @@ public class LobbyServiceImpl implements LobbyService {
                 template.convertAndSendToUser(user.get().getUsername(), "/topic/lobby", "update");
             }
         }
-
     }
 }

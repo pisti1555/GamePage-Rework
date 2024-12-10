@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import projektek.GameSite.dtos.GameStatusDto;
-import projektek.GameSite.dtos.LobbyDto;
 import projektek.GameSite.dtos.UserDto;
+import projektek.GameSite.exceptions.NotFoundException;
 import projektek.GameSite.models.data.game.fitw.FITW;
 import projektek.GameSite.models.data.game.fitw.PieceFITW;
 import projektek.GameSite.models.data.game.fitw.PiecesFITW;
@@ -164,7 +164,7 @@ public class FitwInGameService {
             board.setPieceWon(2);
         }
 
-        if (board.getPieceWon() != 0 && !board.isSaved()) {
+        if (board.getPieceWon() != 0) {
             gameOver();
         }
         return board.getPieceWon();
@@ -172,24 +172,27 @@ public class FitwInGameService {
 
     public int gameOver() {
         Lobby lobby = getLobbyByAuth();
+        FITW game =  getBoardByAuth();
+        if (game.isSaved()) return checkGameOver();
+
         User user1 = lobby.getMembers().get(0);
         User user2 = lobby.getMembers().get(1);
         FitwStats user1Stats = user1.getFitwStats();
         FitwStats user2Stats = user2.getFitwStats();
 
         if (checkGameOver() == 1) {
-            user1Stats.setMoves(user1Stats.getMoves() + ((FITW) lobby.getBoard()).getFlyMoves());
+            user1Stats.setMoves(user1Stats.getMoves() + (game.getFlyMoves()));
             user1Stats.setPlayed(user1Stats.getPlayed() + 1);
             user1Stats.setWon(user1Stats.getWon() + 1);
 
-            user2Stats.setMoves(user2Stats.getMoves() + ((FITW) lobby.getBoard()).getSpiderMoves());
+            user2Stats.setMoves(user2Stats.getMoves() + (game.getSpiderMoves()));
             user2Stats.setPlayed(user2Stats.getPlayed() + 1);
         } else if (checkGameOver() == 2) {
-            user2Stats.setMoves(user2Stats.getMoves() + ((FITW) lobby.getBoard()).getSpiderMoves());
+            user2Stats.setMoves(user2Stats.getMoves() + (game.getSpiderMoves()));
             user2Stats.setPlayed(user2Stats.getPlayed() + 1);
             user2Stats.setWon(user2Stats.getWon() + 1);
 
-            user1Stats.setMoves(user1Stats.getMoves() + ((FITW) lobby.getBoard()).getFlyMoves());
+            user1Stats.setMoves(user1Stats.getMoves() + (game.getFlyMoves()));
             user1Stats.setPlayed(user1Stats.getPlayed() + 1);
         }
 
@@ -219,6 +222,8 @@ public class FitwInGameService {
         FITW board = getBoardByAuth();
         Lobby lobby = getLobbyByAuth();
 
+        if (lobby == null) return null;
+
         List<UserDto> inGameMembers = new ArrayList<>();
         List<Integer> movesOfMembers = new ArrayList<>();
         int winnerPiece = board.getPieceWon();
@@ -233,7 +238,8 @@ public class FitwInGameService {
         return new GameStatusDto(
                 inGameMembers,
                 winnerPiece,
-                movesOfMembers
+                movesOfMembers,
+                this.getPositions()
         );
     }
 
@@ -243,17 +249,31 @@ public class FitwInGameService {
     }
 
     private Lobby getLobbyByAuth() {
-        return lobbyRepository.getLobbyByAnyUser(userService.getUserByAuth());
+        return lobbyRepository.getLobbyByAnyUser(userService.getUserByAuth()).orElseThrow(
+                () -> new NotFoundException(
+                        "You are not in a lobby",
+                        Map.of("lobby", "You are not in a lobby")
+                )
+        );
     }
 
-    public LobbyDto leaveGame() {
+    public void leaveGame() {
+        User user = userService.getUserByAuth();
         Lobby lobby = getLobbyByAuth();
-        lobby.getInGameMembers().remove(userService.getUserByAuth());
-        return new LobbyDto(lobby);
+        updateStatsForUser(user, lobby, false);
+        lobbyRepository.removeUserFromLobby(lobby.getId(), user);
+
+        if (lobby.getMembers().size() == 1) {
+            Optional<User> winner = lobby.getMembers().stream().findFirst();
+            if (winner.isEmpty()) return;
+            updateStatsForUser(winner.get(), lobby, true);
+            lobbyRepository.removeUserFromLobby(lobby.getId(), winner.get());
+        }
+
+        update(lobby);
     }
 
-
-    public void update(Lobby lobby) {
+    private void update(Lobby lobby) {
         template.convertAndSend("/topic/game/fitw", "update");
 
         for (User u : lobby.getMembers()) {
@@ -262,5 +282,28 @@ public class FitwInGameService {
                 template.convertAndSendToUser(user.get().getUsername(), "/topic/game/fitw", "update");
             }
         }
+    }
+
+    private void updateStatsForUser(User user, Lobby lobby, boolean isWinner) {
+        FITW game = (FITW) lobby.getBoard();
+        if (game.isSaved()) return;
+
+        boolean isMainPiece = false;
+        if (lobby.getMembers().get(0).equals(user)) isMainPiece = true;
+        FitwStats stats = user.getFitwStats();
+
+        if (isMainPiece) {
+            stats.setMoves(stats.getMoves() + game.getFlyMoves());
+        } else {
+            stats.setMoves(stats.getMoves() + game.getSpiderMoves());
+        }
+        stats.setPlayed(stats.getPlayed() + 1);
+        if (isWinner) {
+            stats.setWon(stats.getWon() + 1);
+            game.setSaved(true);
+        }
+
+        user.setFitwStats(stats);
+        userRepository.save(user);
     }
 }

@@ -1,7 +1,6 @@
 package projektek.GameSite.models.repositories.implementation;
 
 import org.springframework.stereotype.Repository;
-import projektek.GameSite.exceptions.NotFoundException;
 import projektek.GameSite.models.data.game.GameInformation;
 import projektek.GameSite.models.data.game.fitw.FITW;
 import projektek.GameSite.models.data.lobbies.Lobby;
@@ -9,6 +8,7 @@ import projektek.GameSite.models.data.user.User;
 import projektek.GameSite.models.repositories.lobby.LobbyRepository;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
@@ -32,28 +32,18 @@ public class InMemoryLobbyRepository implements LobbyRepository {
     }
 
     @Override
-    public Lobby getLobbyById(Long id) {
+    public Optional<Lobby> getLobbyById(Long id) {
         Lobby lobby = STORAGE.get(id);
-        if (lobby != null) {
-            return lobby;
-        } else {
-            throw new NotFoundException(
-                    "Lobby was not found",
-                    Map.of("lobby", "Couldn't find lobby")
-            );
-        }
+        return Optional.of(lobby);
     }
 
     @Override
-    public Lobby getLobbyByAnyUser(User user) {
-        for (Lobby lobby : STORAGE.values()) {
-            if (lobby.getMembers().contains(user)) return lobby;
+    public Optional<Lobby> getLobbyByAnyUser(User user) {
+        Lobby lobby = null;
+        for (Lobby l : STORAGE.values()) {
+            if (l.getMembers().contains(user)) lobby = l;
         }
-
-        throw new NotFoundException(
-                "Lobby was not found",
-                Map.of("lobby", "Couldn't find lobby")
-        );
+        return Optional.ofNullable(lobby);
     }
 
     @Override
@@ -71,7 +61,9 @@ public class InMemoryLobbyRepository implements LobbyRepository {
         STORAGE.get(id).getMembers().remove(user);
         if (STORAGE.get(id).getMembers().isEmpty()) {
             STORAGE.remove(id);
+            return true;
         }
+
         STORAGE.get(id).getReadyMembers().remove(user);
         STORAGE.get(id).getInGameMembers().remove(user);
 
